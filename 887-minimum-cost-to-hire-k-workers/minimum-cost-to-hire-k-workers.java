@@ -1,40 +1,31 @@
+class Worker implements Comparable<Worker> {
+    final int q, w;
+    public Worker(int q, int w) {
+        this.q = q;
+        this.w = w;
+    }
+    @Override
+    public int compareTo(Worker other) {
+        return Integer.compare(w * other.q, q * other.w);
+    }
+}
 class Solution {
     public double mincostToHireWorkers(int[] quality, int[] wage, int k) {
-        
         int n = quality.length;
-        
-        List<Pair<Double, Integer>> wageToQualityRatioList = new ArrayList<>();
-        
-        for (int i = 0 ; i < n ; i++) {
-            wageToQualityRatioList.add(new Pair((double) wage[i] / quality[i], quality[i]));
+        Worker[] a = new Worker[n];
+        for (int i = 0; i < n; ++i) {
+            a[i] = new Worker(quality[i], wage[i]);
         }
-        
-        Collections.sort(wageToQualityRatioList, (x, y) -> Double.compare(x.getKey(), y.getKey()));
-        
-        PriorityQueue<Integer> maxHeap = new PriorityQueue<>((x, y) -> (y - x));
-        
-        
-        int curTotalQuality = 0;
-        int curQuality = 0;
-        
-        for (int i = 0 ; i < k ; i++) {
-            curQuality = wageToQualityRatioList.get(i).getValue();
-            maxHeap.add(curQuality);
-            curTotalQuality += curQuality;
+        Arrays.sort(a);
+        int s = 0;
+        double res = 1e15;
+        PriorityQueue<Integer> q = new PriorityQueue<>();
+        for (Worker worker: a) {
+            q.add(-worker.q);
+            s += worker.q;
+            if (q.size() > k) s += q.poll();
+            if (q.size() == k) res = Math.min(res, (double) s * worker.w / worker.q);
         }
-        
-        double curRatio = wageToQualityRatioList.get(k-1).getKey();
-        double ans = curTotalQuality * curRatio;
-        
-        for (int i = k ; i < n ; i++) {
-            curRatio = wageToQualityRatioList.get(i).getKey();
-            curQuality = wageToQualityRatioList.get(i).getValue();
-            
-            maxHeap.add(curQuality);
-            curTotalQuality += curQuality - maxHeap.poll();
-            ans = Math.min(ans, curTotalQuality * curRatio);
-        }
-        
-        return ans;
+        return res;
     }
 }
