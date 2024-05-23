@@ -1,22 +1,27 @@
 class Solution {
-  private int dfs(int[] nums, int k, int i, Set<Integer> set) {
-    if (i == nums.length)
-     return set.isEmpty() ? 0 : 1;
+    public int beautifulSubsets(int[] nums, int k) {
+        
+        Map<Integer, Integer> m = new HashMap<>();
 
-    var cnt = dfs(nums, k, i+1, set);
-    
-    if (set.contains(nums[i] - k)) return cnt;
+        for (int num : nums) m.put(num, m.getOrDefault(num, 0) + 1);
 
-    set.add(nums[i]);
-    cnt += dfs(nums, k, i+1 ,set);
-    set.remove(nums[i]);
+        int res = 1, prev = 0, prevPrev = 0;
 
-    return cnt;
-  }
+        for (Map.Entry<Integer, Integer> e : m.entrySet()) {
+            int cur = e.getKey();
 
-  public int beautifulSubsets(int[] nums, int k) {
-    Arrays.sort(nums);
+            if (m.containsKey(cur - k)) continue;
+            
+            prev = 0;
 
-    return dfs(nums, k, 0, new HashSet<Integer>());
-  }
+            while (m.containsKey(cur)) {
+                prevPrev = prev;
+                prev = ((1 << m.get(cur)) - 1) * res;
+                res += prevPrev;
+                cur += k;
+            }
+            res += prev;
+        }
+        return res - 1;
+    }
 }
